@@ -65,11 +65,16 @@ p "hello".class
 p "world".class
 
 
+# In the above example, we use the class instance method to 
+# determine what the class is for each object. As you can see,
+# everything we've been using, from strings to integers, are
+# in fact objects, which are instantiated from a class. We'll
+# dig deeper into this very soon.
 
+# Class Define Objects
 
-
-
-
+# Ruby defines the attributes and behaviors of its objects in 
+# classes.
 
 
 
