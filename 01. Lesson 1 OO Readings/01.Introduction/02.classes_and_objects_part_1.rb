@@ -635,30 +635,144 @@
 
 # Book Answer
 
+# class MyCar
+#   def initialize(year, model, color)
+#     @year = year
+#     @model = model
+#     @color = color
+#     @current_speed = 0
+#   end
+
+#   def speed_up(number)
+#     @current_speed += number
+#     puts "You push the gas and accelerate #{number} mph."
+#   end
+
+#   def brake(number)
+#     @current_speed -= number
+#     puts "You push the brake and decelerate #{number} mph."
+#   end
+
+#   def current_speed
+#     puts "You are now going #{@current_speed} mph."
+#   end
+
+#   def shut_down
+#     @current_speed = 0
+#     puts "Let's park this bad boy!"
+#   end
+
+#   def info
+#     "You are in a #{@year} #{@color} #{@model}"
+#   end
+# end
+
+# lumina = MyCar.new(1997, 'chevy lumina', 'white')
+# lumina.speed_up(20)
+# puts lumina.info
+# lumina.current_speed
+# lumina.speed_up(20)
+# lumina.current_speed
+# lumina.brake(20)
+# lumina.current_speed
+# lumina.brake(20)
+# lumina.current_speed
+# lumina.shut_down
+# lumina.current_speed
+
+
+# 2) Add an accessor method to your MyCar class to change and view the color
+# of your car. Then add an accessor method that allows you to view, but not
+# modify, the year of your car.
+
+
+# class MyCar
+#   attr_accessor :color
+#   attr_reader :year
+
+#   def initialize(year, model, color)
+#     @year = year
+#     @model = model
+#     @color = color
+#     @speed = 0
+#   end
+
+#   def speed_up(number)
+#     @speed += number
+#     puts "You push the gas and speed up #{number} mph."
+#   end
+
+#   def brake(number)
+#     @speed -= number
+#     puts "You push the brake and slow down #{number} mph."
+#   end
+
+#   def shut_off
+#     @speed = 0
+#     puts "Let's park this bad boy!"
+#   end
+
+#   def current_speed
+#     "Your current speed is #{@speed}"
+#   end
+
+# end
+
+# car = MyCar.new(2004, "Buick Regal", "gold")
+# car.speed_up(45)
+# car.shut_off
+# puts car.current_speed
+# puts car.color
+# car.color = "Muave"
+# puts car.color
+# puts car.year
+
+#3) You want to create a nice interface that allows you to accurately describe
+# the action you want your program to perform. Create a method called spray_paint
+# that can be called on an object and will modify the color of the car.
+
+
 class MyCar
+  attr_accessor :color
+  attr_reader :year
+
   def initialize(year, model, color)
     @year = year
     @model = model
     @color = color
-    @current_speed = 0
+    @speed = 0
+  end
+
+  def spray_paint(color)
+    self.color = color
+    puts "Your new #{color} paint job looks great!"
   end
 
   def speed_up(number)
+    @speed += number
+    puts "You push the gas and speed up #{number} mph."
+  end
 
+  def brake(number)
+    @speed -= number
+    puts "You push the brake and slow down #{number} mph."
+  end
+
+  def shut_off
+    @speed = 0
+    puts "Let's park this bad boy!"
+  end
+
+  def current_speed
+    "Your current speed is #{@speed}"
   end
 
 end
 
-
-
-
-
-
-
-
-
-
-
+car = MyCar.new(2004, "Buick Regal", "gold")
+puts car.color
+car.spray_paint("Mahogany")
+puts car.color
 
 
 
