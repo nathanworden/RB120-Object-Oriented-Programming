@@ -123,39 +123,192 @@
 
 # Access Control
 
-class Box
-  def initialize(w, h)
-    @width, @height = w, h
-  end
+# class Box
+#   def initialize(w, h)
+#     @width, @height = w, h
+#   end
 
-  def getArea
-    getWidth() * getHeight
-  end
+#   def getArea
+#     getWidth() * getHeight
+#   end
 
-  def getWidth
-    @width
-  end
+#   def getWidth
+#     @width
+#   end
 
-  def getHeight
-    @height
-  end
+#   def getHeight
+#     @height
+#   end
 
-  private :getWidth, :getHeight
+#   private :getWidth, :getHeight
 
-  def printArea
-    @area = getWidth() * getHeight
-    puts "Big box area is: #@area"
-  end
+#   def printArea
+#     @area = getWidth() * getHeight
+#     puts "Big box area is: #@area"
+#   end
 
-  protected :printArea
-end
+#   protected :printArea
+# end
 
-box = Box.new(10, 20)
+# box = Box.new(10, 20)
 
-a = box.getArea()
-puts "Area of the box is: #{a}"
+# a = box.getArea()
+# puts "Area of the box is: #{a}"
 
-box.printArea()
+# box.printArea()
+
+# ___________________________________________________________________
+
+# Class Inheritance
+
+# class Box
+#   def initialize(w, h)
+#     @width, @height = w, h
+#   end
+
+#   def getArea
+#     @width * @height
+#   end
+# end
+
+# class BigBox < Box
+#   def printArea
+#     @area = @width * @height
+#     puts "Big box area is: #@area"
+#   end
+# end
+
+# box = BigBox.new(10, 20)
+
+# box.printArea()
+
+
+# ___________________________________________________________________
+
+# Methods Overriding
+
+# class Box
+#   def initialize(w, h)
+#     @width, @height = w, h
+#   end
+
+#   def getArea
+#     @width * @height
+#   end
+# end
+
+# class BigBox < Box
+#   def getArea
+#     @area = @width * @height
+#     puts "Big box area is: #@area"
+#   end
+# end
+
+# box = BigBox.new(10, 20)
+
+# box.getArea()
+
+
+# ___________________________________________________________________
+
+# Operator Overloading
+
+# class Box
+# attr_accessor :width, :height
+
+#   def initialize(w, h)
+#     @width, @height = w, h
+#   end
+
+#   def +(other)
+#     Box.new(@width + other.width, @height + other.height)
+#   end
+
+#   def -@
+#     Box.new(-@width, -@height)
+#   end
+
+#   def *(scalar)
+#     Box.new(@width * scalar, @height * scalar)
+#   end
+
+#   def to_s
+#     "w: #@width, h: #@height"
+#   end
+# end
+
+# box1 = Box.new(10, 20)
+# box2 = Box.new(20, 30)
+
+# box3 = box1 +(box2)
+
+# puts box3
+
+
+# ___________________________________________________________________
+
+# Class Constants
+
+# class Box
+#   BOX_COMPANY = "TATA Inc"
+#   BOXWEIGHT = 10
+#   def initialize(w, h)
+#     @width, @height = w, h
+#   end
+
+#   def getArea
+#     @width * @height
+#   end
+# end
+
+# box = Box.new(10, 20)
+
+# a = box.getArea
+# puts "Area of the box is: #{a}"
+
+# puts Box::BOX_COMPANY
+# puts "Box weight is #{Box::BOXWEIGHT}"
+
+# ___________________________________________________________________
+
+# Class Information
+
+# class Box
+#   puts "Name of self = #{self.name}"
+#   puts "Type of self = #{self.type}"
+# end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
