@@ -268,19 +268,76 @@
 
 # -------------------------------------------------------------
 
+# Ruby exceptions
+
+# x = 35
+# y = 0
+
+# begin
+#   z = x / y
+#   puts z
+# rescue => e
+#   puts e
+#   p e
+# end
 
 
+# A programmer may raise exceptions himself using the raise keyword
+
+# age = 17
+
+# begin 
+#   if age < 18
+#     raise "Person is a minor"
+#   end
+
+#   puts "Entry allowed"
+# rescue => e
+#   puts e
+#   p e
+#   exit 1
+# end
+
+# -------------------------------------------------------------
+
+# Ruby's ensure clause creates a block of code that always executes, whether there is an exception or not.
+
+# begin f = File.open("stones", "r")
+
+#   while line = f.gets do
+#     puts line
+#   end
+
+# rescue => e
+#   puts e
+#   p e
+# ensure
+#   f.close if f
+# end
 
 
+# -------------------------------------------------------------
 
+# We can create our own custom exceptions if we want. Custom exceptions in Ruby should inherit from the StandardError class.
 
+class BigValueError < StandardError; end
 
+LIMIT = 333
+x = 3_432_453
 
+begin
 
+  if x > LIMIT
+    raise BigValueError, "Exceeded the maximum value"
+  end
 
+  puts "Script continues"
 
-
-
+rescue => e
+  puts e
+  p e
+  exit 1
+end
 
 
 
