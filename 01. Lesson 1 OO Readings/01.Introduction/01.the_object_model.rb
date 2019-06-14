@@ -104,9 +104,9 @@
 # is that an object is returned by calling the class method 
 # new. Take a look at Figure 3 to visualize what we're doing.
 
-# Defining and creating a new instance of a basic class is
-# simple. But before we go any further showing you how to create
-# more elaborate classes, let's talk about modules briefly.
+# # Defining and creating a new instance of a basic class is
+# # simple. But before we go any further showing you how to create
+# # more elaborate classes, let's talk about modules briefly.
 
 # Modules
 

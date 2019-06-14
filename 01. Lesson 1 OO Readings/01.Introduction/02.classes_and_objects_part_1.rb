@@ -22,7 +22,7 @@
 # to bark, run, fetch, and perform other common behaviors of
 # good dogs. We define these behaviors as instance methods in
 # a class. Instance methods defined in a class are available to
-# objects (or instances) of taht class.
+# objects (or instances) of that class.
 
 # So in summary, instance variables keep track of state, and
 # instance methods expose behavior for objects. Let's take a
@@ -57,7 +57,7 @@
 
 # Instance Variables
 
-# So now that we know how to use constructors in Ruby, let's
+# # So now that we know how to use constructors in Ruby, let's
 # create a new object and instantiate it with some stae, like
 # a name.
 
@@ -101,9 +101,9 @@
 # object's state is unique, and instance variables are how we
 # keep track.
 
-# Instance Methods
+# # Instance Methods
 
-# Right now, our GoodDog class can't really do anything.
+# # Right now, our GoodDog class can't really do anything.
 # Let's give it some behaviors.
 
 # good_dog.rb
@@ -140,11 +140,11 @@
 # behaviors, though they contain different states; here the 
 # differing state is the name. 
 
-# What if we wanted to not just say "Arf!", but say "Sparky says
-# arf!"? In our instance methods, which is what all the methods
-# are so far, we have access to instance variables. So, we can
-# use string interpolation and chage our speak method to
-# this: (other code omitted)
+What if we wanted to not just say "Arf!", but say "Sparky says
+arf!"? In our instance methods, which is what all the methods
+are so far, we have access to instance variables. So, we can
+use string interpolation and chage our speak method to
+this: (other code omitted)
 
 # good_dog.rb
 
