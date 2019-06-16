@@ -15,8 +15,8 @@ class History
   end
 
   def add_moves!(human, computer)
-    @human_moves << human          # in the example problem this is human.value
-    @computer_moves << computer    # in the example problem this is computer.value
+    @human_moves << human
+    @computer_moves << computer
   end
 
   def add_winner!(name)
@@ -38,16 +38,23 @@ end
 class Player
   attr_accessor :move, :name, :score
 
-  def initialize
-    puts "A player has been created"
-  end
-
   def set_score
     @score = 0
   end
 end
 
 class Human < Player
+  def set_name
+    name = ''
+    loop do
+      puts "What's your name?"
+      answer = gets.chomp.strip
+      break unless name.empty?
+      puts "Sorry, must enter a value."
+    end
+    self.namme = name.capitalize
+  end
+
   def choose
     choice = nil
     loop do
@@ -56,13 +63,46 @@ class Human < Player
       break if ['rock', 'paper', 'scissors', 'lizard', 'spock'].include?(choice)
       puts "Sorry, invalid choice."
     end
-    self.move = choice
+    self.move = Move.new(choice)
   end
 end
 
 class Computer < Player
   def choose
-    self.move = ['rock', 'paper', 'scissors', 'lizard', 'spock'].sample
+    self.move = Move.new(Move::WINNING_PIECES.keys.sample)
+  end
+end
+
+class Move
+  attr_reader :value
+
+  def initialize(value)
+    @value = value
+  end
+
+  WINNING_PIECES = { 'rock' => ['scissors', 'lizard'],
+                     'paper' => ['rock', 'spock'],
+                     'scissors' => ['paper', 'lizard'],
+                     'lizard' => ['paper', 'spock'],
+                     'spock' => ['scissors', 'rock'] }
+
+  EXPLINATION = { 'rock' => ['crushes scissors', 'crushes lizard'],
+                  'paper' => ['covers rock', 'disproves Spock'],
+                  'scissors' => ['cuts paper', 'decapitates lizard'],
+                  'lizard' => ['eats paper', 'poisons Spock'],
+                  'spock' => ['smashes scissors', 'vaporizes rock'] }
+
+  def >(other_move)
+    WINNING_PIECES[value].include?(other_move.value)
+  end
+
+  def defeated(other_move)
+    index = WINNING_PIECES[value].index(other_move.value)
+    puts "#{value} #{EXPLINATION[value][index]}"
+  end
+
+  def to_s
+    @value
   end
 end
 
@@ -74,30 +114,31 @@ class RPSGame
     @computer = Computer.new
   end
 
-  WINNING_PIECES = {'rock' => ['scissors', 'lizard'],
-                    'paper' => ['rock', 'spock'],
-                    'scissors' => ['paper', 'lizard'],
-                    'lizard' => ['paper', 'spock'],
-                    'spock' => ['scissors', 'rock'] }
-
   def play
-    history = History.new
     p "Human chooses #{human.choose}"
     p "Computer chosses #{computer.choose}"
-    p WINNING_PIECES[human.move].include?(computer.move)
- end
+    why?
+  end
+
+  def human_won?
+    human.move > computer.move
+  end
+
+  def computer_won?
+    computer.move > human.move
+  end
+
+  def why?
+    if human_won?
+      print "Human won because "
+      human.move.defeated(computer.move)
+    elsif computer_won?
+      print "Computer won becuase "
+      computer.move.defeated(human.move)
+    else
+      puts "Its a tie!"
+    end
+  end
 end
 
-
 RPSGame.new.play
-
-
-
-
-
-
-
-
-
-
-
