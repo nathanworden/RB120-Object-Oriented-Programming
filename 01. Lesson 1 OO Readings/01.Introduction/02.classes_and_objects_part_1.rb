@@ -140,11 +140,11 @@
 # behaviors, though they contain different states; here the 
 # differing state is the name. 
 
-What if we wanted to not just say "Arf!", but say "Sparky says
-arf!"? In our instance methods, which is what all the methods
-are so far, we have access to instance variables. So, we can
-use string interpolation and chage our speak method to
-this: (other code omitted)
+# What if we wanted to not just say "Arf!", but say "Sparky says
+# arf!"? In our instance methods, which is what all the methods
+# are so far, we have access to instance variables. So, we can
+# use string interpolation and chage our speak method to
+# this: (other code omitted)
 
 # good_dog.rb
 

@@ -26,8 +26,8 @@ class History
 
   def show_history(len1, len2)
     turns.length.times do |idx|
-      puts "#{turns[idx].center(5)}#{human_moves[idx].center(len1 + 12)}"\
-      "#{computer_moves[idx].ljust(10)}#{winner[idx].rjust(len2 + 2)}"
+      puts "|#{turns[idx].center(5)}#{human_moves[idx].center(len1 + 12)}"\
+      "#{computer_moves[idx].ljust(12)}#{winner[idx].rjust(len2 + 2)}#{'   '}|"
     end
   end
 
@@ -140,10 +140,14 @@ class RPSGame
 
   def display_game_history
     len1 = human.name.length
-    len2 = human.name.length
-    puts "\nRound   #{human.name}   #{computer.name}    Winner"
-    puts "------------------------------#{'-' * (len11 * 1.5)}"
-    history.show_history(len1, len2)
+    len2 = computer.name.length
+    puts "+----------------------------------#{'-' * len1}#{'-' * len2}+"
+    puts "|" + "GAME HISTORY".center(34 + len1 + len2) + "|"
+    puts "|----------------------------------#{'-' * len1}#{'-' * len2}|"
+    puts "| Round      #{human.name}      #{computer.name}       Winner   |"
+    puts "+----------------------------------#{'-' * len1}#{'-' * len2}+"
+    "|#{history.show_history(len1, len2)}"
+    puts "+----------------------------------#{'-' * len1}#{'-' * len2}+"
   end
 
   def outer_game_loop
@@ -166,7 +170,7 @@ class RPSGame
 
   def inner_game_loop
     loop do
-      @rounds = 0
+      @rounds += 1
       inner_loop_game_methods
       break if grand_winner?
     end
@@ -180,7 +184,6 @@ class RPSGame
     display_moves
     display_winner
     increment_score!
-    why_they_won
     add_winner_in_history
     display_game_history
   end
@@ -212,8 +215,8 @@ class RPSGame
   end
 
   def display_moves
-    p "#{human.name} chooses #{human.choose}"
-    p "#{computer.name} chooses #{computer.choose}"
+    p "#{human.name} chooses #{human.move}"
+    p "#{computer.name} chooses #{computer.move}"
   end
 
   def display_score
@@ -223,7 +226,7 @@ class RPSGame
     puts ''
   end
 
-  def why_they_won
+  def display_winner
     if human_won?
       print "#{human.name} won because "
       because(human, computer)
@@ -254,11 +257,14 @@ class RPSGame
   def play_again?
     answer = ''
     loop do
-      puts "Would you like to play again?"
+      puts "Would you like to play again? y/n"
       answer = gets.chomp.downcase
       break if ['y', 'n'].include?(answer)
       puts 'Sorry, must be y or n.'
     end
+
+    return true if answer == 'y'
+    return false if answer == 'n'
   end
 
   def clear_screen
@@ -266,5 +272,4 @@ class RPSGame
   end
 end
 
-binding.pry
 RPSGame.new.play
