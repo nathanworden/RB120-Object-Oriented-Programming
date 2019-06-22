@@ -193,7 +193,6 @@ class Move
     SUPERIORITY[other.to_s.to_sym].sample
   end
 
-  binding.pry
   def self.valid_moves
     VALUES.map do |abr, long|
       "#{long} (#{abr})"
