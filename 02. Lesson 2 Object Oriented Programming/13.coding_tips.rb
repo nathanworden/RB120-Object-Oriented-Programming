@@ -340,8 +340,6 @@ RPSGame.new.play
 
 
 
-end
-
 
 
 
