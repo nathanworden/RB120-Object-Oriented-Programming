@@ -1,14 +1,14 @@
-module Study
+# module Study
 
-end
+# end
 
-module Outer
-  class MyClass
-    include Study
-  end
+# module Outer
+#   class MyClass
+#     include Study
+#   end
 
-end
+# end
   
-my_obj = Outer::MyClass.new
+# my_obj = Outer::MyClass.new
 
-puts Outer::MyClass.ancestors
+# puts Outer::MyClass.ancestors
