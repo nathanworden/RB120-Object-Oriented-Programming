@@ -131,6 +131,7 @@
 # Question 8
 # If we have a class such as the one below:
 
+<<<<<<< HEAD
 # class Cat
 #   attr_accessor :type, :age
 
@@ -181,6 +182,9 @@ end
 
 p bag = Bag.new("red", "leather")
 
+=======
+# changes
+>>>>>>> 0e24e3355252dac1b94c36e0332d3a47bfc146c8
 
 
 
