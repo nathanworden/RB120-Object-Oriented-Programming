@@ -124,13 +124,62 @@
 # p cube.get_volume
 
 # Question 7
-What is the default return value of to_s when invoked on an object? Where could you go to find out if you want to be sure?
+# What is the default return value of to_s when invoked on an object? Where could you go to find out if you want to be sure?
+
+# By default, the to_s method returns the name of the object's class and an encoding of the object id.
+
+# Question 8
+# If we have a class such as the one below:
+
+# class Cat
+#   attr_accessor :type, :age
+
+#   def initialize(type)
+#     @type = type
+#     @age  = 0
+#   end
+
+#   def make_one_year_older
+#     self.age += 1
+#   end
+# end
+# You can see in the make_one_year_older method we have used self. What does self refer to here?
+
+# Here ::self refers to the object it is called on. An instance of the class Cat.
 
 
+# Question 9
+# If we have a class such as the one below:
 
+# class Cat
+#   @@cats_count = 0
 
+#   def initialize(type)
+#     @type = type
+#     @age  = 0
+#     @@cats_count += 1
+#   end
 
+#   def self.cats_count
+#     @@cats_count
+#   end
+# end
+# In the name of the cats_count method we have used self. What does self refer to in this context?
 
+# It is a  class method. It can only be called on the class
+# and not instances of the class.
+
+# Question 10
+# If we have the class below, what would you need to call to create a new instance of this class.
+
+class Bag
+  def initialize(color, material)
+    @color = color
+    @material = material
+  end
+end
+
+p bag = Bag.new("red", "leather")
 
 
 
