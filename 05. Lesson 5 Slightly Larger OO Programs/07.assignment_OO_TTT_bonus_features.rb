@@ -1,10 +1,12 @@
 require 'pry'
 class Board
-  INITIAL_MARKER = " "
+  WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + #rows
+                  [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + #cols
+                  [[1, 5, 9], [3, 5, 7]]          # diagnols
 
   def initialize
     @squares = {}
-    (1..9).to_a.each {|key| @squares[key] = Square.new(INITIAL_MARKER)}
+    (1..9).to_a.each {|key| @squares[key] = Square.new}
   end
 
   def get_square_at(key)
@@ -15,20 +17,46 @@ class Board
     @squares[key].marker = marker
   end
 
-  def open_squares
-    @squares.select {|key, value| value.marker == INITIAL_MARKER}
+  def unmarked_keys
+    @squares.select {|_, sq| sq.unmarked?}.keys
+  end
+
+  def full?
+    unmarked_keys.empty?
+  end
+
+  def someone_won?
+    !!detect_winner
+  end
+
+#  returns winning marker or nil
+  def detect_winner
+    binding.pry
+    WINNING_LINES.each do |line|
+      if @squares[line[0]].marker == TTTGame::HUMAN_MARKER && @squares[line[1]].marker == TTTGame::HUMAN_MARKER && @squares[line[2]].marker == TTTGame::HUMAN_MARKER
+        return TTTGame::HUMAN_MARKER
+      elsif @squares[line[0]].marker == TTTGame::COMPUTER_MARKER && @squares[line[1]].marker == TTTGame::COMPUTER_MARKER && @squares[line[2]].marker == TTTGame::COMPUTER_MARKER
+        return TTTGame::COMPUTER_MARKER
+      end
+    end
+    nil
   end
 end
 
 class Square
+  INITIAL_MARKER = " "
   attr_accessor :marker
 
-  def initialize(marker)
+  def initialize(marker=INITIAL_MARKER)
     @marker = marker
   end
 
   def to_s
     @marker
+  end
+
+  def unmarked?
+    marker == INITIAL_MARKER
   end
 end
 
@@ -42,12 +70,13 @@ end
 
 class TTTGame
   HUMAN_MARKER = "X"
+  COMPUTER_MARKER = "O"
   attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
-    @human = Player.new("X")
-    @computer = Player.new("O")
+    @human = Player.new(HUMAN_MARKER)
+    @computer = Player.new(COMPUTER_MARKER)
   end
 
   def display_welcome_message
@@ -60,6 +89,9 @@ class TTTGame
   end
 
   def display_board
+    system 'clear'
+    display_welcome_message
+    puts "You're a #{human.marker}. Computer is a #{computer.marker}."
     puts ""
     puts "     |     |"
     puts "  #{board.get_square_at(1)}  |  #{board.get_square_at(2)}  |  #{board.get_square_at(3)}"
@@ -76,29 +108,45 @@ class TTTGame
   end
 
   def human_moves
-    puts "Your move! Your open options are: #{@board.open_squares.keys}"
-    answer = nil
+    puts "Your move! Your open options are: #{board.unmarked_keys.join(', ')}"
+    square = nil
     loop do
-      answer = gets.chomp.to_i
-      break if board.open_squares.keys.include?(answer)
-      puts "I'm sorry, that square has already been taken."
+      square = gets.chomp.to_i
+      break if board.unmarked_keys.include?(square)
+      case
+      when square > 0
+        puts "That square has already been taken ya dufus."
+      else
+        puts "I'm sorry but you didn't input a number. I think you hit another random key on your keyboard. That is not the way we play this game. Please try again."
+      end
     end
-    board.set_square_at(answer, human.marker)
+    board.set_square_at(square, human.marker)
+  end
+
+  def computer_moves
+    computer_choice = board.unmarked_keys.sample
+    board.set_square_at(computer_choice, computer.marker)
+  end
+
+  def display_result
+    display_board
+    puts "The board is full!"
+  end
+
+  def someone_won?
+    false
   end
 
   def play
-    display_welcome_message
+    display_board
     loop do
-      display_board
       human_moves
-      display_board
-      break
-      break if someone_won? || board_full?
-
+      break if board.someone_won? || board.full?
       computer_moves
-      break if someone_won? || board_full?
+      break if board.someone_won? || board.full?
+      display_board
     end
-    # display_result
+    display_result
     display_goodbye_message
   end
 end
