@@ -29,13 +29,21 @@ class Board
     !!detect_winner
   end
 
+  def count_human_marker(line)
+   [@squares[line[0]].marker, @squares[line[1].marker, @squares[line[2]].marker].count(TTTGame::HUMAN_MARKER)
+  end
+
+  def count_computer_marker()
+    [@squares[line[0]].marker, @squares[line[1]].marker, @squares[line[2]].marker].count(TTTGame::COMPUTER_MARKER)
+  end
+
 #  returns winning marker or nil
   def detect_winner
     binding.pry
     WINNING_LINES.each do |line|
-      if @squares[line[0]].marker == TTTGame::HUMAN_MARKER && @squares[line[1]].marker == TTTGame::HUMAN_MARKER && @squares[line[2]].marker == TTTGame::HUMAN_MARKER
+      if count_human_marker(line) == 3
         return TTTGame::HUMAN_MARKER
-      elsif @squares[line[0]].marker == TTTGame::COMPUTER_MARKER && @squares[line[1]].marker == TTTGame::COMPUTER_MARKER && @squares[line[2]].marker == TTTGame::COMPUTER_MARKER
+      elsif count_computer_marker(line) == 3
         return TTTGame::COMPUTER_MARKER
       end
     end
@@ -130,7 +138,15 @@ class TTTGame
 
   def display_result
     display_board
+
+    case board.detect_winner
+    when human.marker
+      puts "You won!"
+    when computer.marker
+      puts "Computer won!"
+    else
     puts "The board is full!"
+    end
   end
 
   def someone_won?
