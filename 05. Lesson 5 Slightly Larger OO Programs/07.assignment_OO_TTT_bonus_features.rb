@@ -29,27 +29,57 @@ class Board
     !!detect_winner
   end
 
-  def count_human_marker(line)
-   [@squares[line[0]].marker, @squares[line[1].marker, @squares[line[2]].marker].count(TTTGame::HUMAN_MARKER)
+  def count_human_marker(squares)
+    squares.collect(&:marker).count(TTTGame::HUMAN_MARKER)
   end
 
-  def count_computer_marker()
-    [@squares[line[0]].marker, @squares[line[1]].marker, @squares[line[2]].marker].count(TTTGame::COMPUTER_MARKER)
+  def count_computer_marker(squares)
+    squares.collect(&:marker).count(TTTGame::COMPUTER_MARKER)
   end
+
+  # def count_human_marker(line)
+  #  [@squares[line[0]].marker, @squares[line[1]].marker, @squares[line[2]].marker].count(TTTGame::HUMAN_MARKER)
+  # end
+
+  # def count_computer_marker(line)
+  #   [@squares[line[0]].marker, @squares[line[1]].marker, @squares[line[2]].marker].count(TTTGame::COMPUTER_MARKER)
+  # end
 
 #  returns winning marker or nil
   def detect_winner
-    binding.pry
     WINNING_LINES.each do |line|
-      if count_human_marker(line) == 3
+      binding.pry
+      if count_human_marker(@squares.values_at(*line)) == 3
         return TTTGame::HUMAN_MARKER
-      elsif count_computer_marker(line) == 3
+      elsif count_computer_marker(@squares.values_at(*line)) == 3
         return TTTGame::COMPUTER_MARKER
       end
     end
     nil
   end
 end
+#   def detect_winner
+#     WINNING_LINES.each do |line|
+#       if count_human_marker(@squares.select{|k, _| line.include?(k)}.values) == 3
+#         return TTTGame::HUMAN_MARKER
+#       elsif count_computer_marker(@squares.select{|k, _| line.include?(k)}.values) == 3
+#         return TTTGame::COMPUTER_MARKER
+#       end
+#     end
+#     nil
+#   end
+# end
+#   def detect_winner
+#     WINNING_LINES.each do |line|
+#       if count_human_marker(line) == 3
+#         return TTTGame::HUMAN_MARKER
+#       elsif count_computer_marker(line) == 3
+#         return TTTGame::COMPUTER_MARKER
+#       end
+#     end
+#     nil
+#   end
+# end
 
 class Square
   INITIAL_MARKER = " "
@@ -145,7 +175,7 @@ class TTTGame
     when computer.marker
       puts "Computer won!"
     else
-    puts "The board is full!"
+    puts "It's a tie!"
     end
   end
 
