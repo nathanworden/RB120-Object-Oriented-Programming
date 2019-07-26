@@ -25,13 +25,17 @@ class Board
     !!winning_marker
   end
 
-  def count_human_marker(squares)
-    squares.collect(&:marker).count(TTTGame::HUMAN_MARKER)
-  end
+  # def count_human_marker(squares)
+  #   line = squares.collect(&:marker)
+  #   if line[0] == line[1] && line[1] == line[2]
+  #     return line[0]
+  #   else
+  #     return nil
+  # end
 
-  def count_computer_marker(squares)
-    squares.collect(&:marker).count(TTTGame::COMPUTER_MARKER)
-  end
+  # def count_computer_marker(squares)
+  #   squares.collect(&:marker).count(TTTGame::COMPUTER_MARKER)
+  # end
 
   def []=(num, marker)
     @squares[num].marker = marker
@@ -46,15 +50,43 @@ class Board
   # end
 
 #  returns winning marker or nil
+  # def winning_marker
+  #   WINNING_LINES.each do |line|
+  #     if count_human_marker(@squares.values_at(*line)) == 3
+  #       return TTTGame::HUMAN_MARKER
+  #     elsif count_computer_marker(@squares.values_at(*line)) == 3
+  #       return TTTGame::COMPUTER_MARKER
+  #     end
+  #   end
+  #   nil
+  # end
+
+  # def winning_marker
+  #   WINNING_LINES.each do |line|
+  #     trio = @squares.values_at(*line).collect(&:marker)
+  #       if trio[0] == trio[1] && trio[1] == trio[2] && trio.none?(Square::INITIAL_MARKER)
+  #         return trio[0]
+  #       else
+  #         next
+  #       end
+  #     end
+  #   nil
+  # end
+
   def winning_marker
     WINNING_LINES.each do |line|
-      if count_human_marker(@squares.values_at(*line)) == 3
-        return TTTGame::HUMAN_MARKER
-      elsif count_computer_marker(@squares.values_at(*line)) == 3
-        return TTTGame::COMPUTER_MARKER
+      squares = @squares.values_at(*line)
+      if three_identical_markers?(squares)
+        return squares.first.marker
       end
     end
     nil
+  end
+
+  def three_identical_markers?(squares)
+    markers = squares.select(&:marked?).collect(&:marker)
+    return false if markers.size != 3
+    markers.min == markers.max
   end
 
   def reset
@@ -113,6 +145,10 @@ class Square
   def unmarked?
     marker == INITIAL_MARKER
   end
+
+  def marked?
+    marker != INITIAL_MARKER
+  end
 end
 
 class Player
@@ -126,12 +162,37 @@ end
 class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
+  FIRST_TO_MOVE = HUMAN_MARKER
   attr_reader :board, :human, :computer
+
+  def play
+    display_welcome_message
+    sleep(1)
+    clear
+    loop do
+      display_board
+
+      loop do
+        current_player_moves
+        break if board.someone_won? || board.full?
+        clear_screen_and_display_board if human_turn?
+      end
+      display_result
+      break unless play_again?
+      reset
+      display_play_again_message
+    end
+
+    display_goodbye_message
+  end
+
+  private
 
   def initialize
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
     @computer = Player.new(COMPUTER_MARKER)
+    @current_marker = FIRST_TO_MOVE
   end
 
   def display_welcome_message
@@ -156,6 +217,7 @@ class TTTGame
   end
 
   def human_moves
+    binding.pry
     puts "Your move! Your open options are: #{board.unmarked_keys.join(', ')}"
     square = nil
     loop do
@@ -202,16 +264,13 @@ class TTTGame
     return true if answer == 'y'
   end
 
-  def someone_won?
-    false
-  end
-
   def clear
     system 'clear'
   end
 
   def reset
     board.reset
+    @current_marker = FIRST_TO_MOVE
     clear
   end
 
@@ -220,27 +279,18 @@ class TTTGame
     puts ""
   end
 
-  def play
-    display_welcome_message
-    sleep(1)
-    clear
-    loop do
-      display_board
-
-      loop do
-        human_moves
-        break if board.someone_won? || board.full?
+  def current_player_moves
+    if human_turn?
+      human_moves
+      @current_marker = COMPUTER_MARKER
+    else
         computer_moves
-        break if board.someone_won? || board.full?
-        clear_screen_and_display_board
-      end
-      display_result
-      break unless play_again?
-      reset
-      display_play_again_message
+        @current_marker = HUMAN_MARKER
     end
+  end
 
-    display_goodbye_message
+  def human_turn?
+    @current_marker == HUMAN_MARKER
   end
 end
 
