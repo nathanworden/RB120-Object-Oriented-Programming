@@ -1,5 +1,3 @@
-require 'pry'
-
 class Board
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # cols
@@ -29,9 +27,7 @@ class Board
   def winning_marker
     WINNING_LINES.each do |line|
       squares = @squares.values_at(*line)
-      if three_identical_markers?(squares)
-        return squares.first.marker
-      end
+      return squares.first.marker if three_identical_markers?(squares)
     end
     nil
   end
@@ -40,8 +36,10 @@ class Board
     square = nil
     WINNING_LINES.each do |line|
       if @squares.values_at(*line).map(&:marker).count(marker_type) == 2
-        square_arr = @squares.select {|k, v| line.include?(k) && v.marker == Square::INITIAL_MARKER}.keys
-        square = square_arr.first if square_arr.size > 0
+        square_arr = @squares.select do |k, v|
+          line.include?(k) && v.marker == Square::INITIAL_MARKER
+        end.keys
+        square = square_arr.first if !square_arr.empty?
       end
     end
     square
@@ -116,11 +114,10 @@ class Player
   def name_me!
     if marker == TTTGame::COMPUTER_MARKER
       puts "What should the computer be called?"
-      return gets.chomp
     else
       puts "What is your name?"
-      return gets.chomp
     end
+    gets.chomp
   end
 end
 
@@ -170,6 +167,7 @@ class TTTGame
 
       inner_game_loop
 
+      clear_screen_and_display_board
       display_result
       break if champion?
       reset_board
@@ -177,8 +175,15 @@ class TTTGame
   end
 
   def pick_your_marker
-    puts "Pick any key on your keyboard to be your marker"
-    human_marker = gets.chomp
+    answer = nil
+    loop do
+      puts "Pick any key on your keyboard (except 'O') to be your marker"
+      answer = gets.chomp
+      break unless answer == COMPUTER_MARKER || answer.nil?
+      puts "#{COMPUTER_MARKER} is already taken you dufus." \
+       "Pick something else or I'll call you a dum-dum"
+    end
+    answer
   end
 
   def champion?
@@ -187,11 +192,12 @@ class TTTGame
 
   def display_champion
     puts "You are our grand champion! Amazing!" if human.score == 3
-    puts "Computer is our grand champion! You have failed humanity." if computer.score == 3
+    puts "#{computer.name} is our grand champion!" if computer.score == 3
   end
 
   def display_score
-    puts "The score is #{human.name}: #{human.score}, #{computer.name}: #{computer.score}"
+    puts "The score is #{human.name}: #{human.score}," \
+    " #{computer.name}: #{computer.score}"
     puts "First one to 3 is our grand champion!"
   end
 
@@ -216,20 +222,31 @@ class TTTGame
   end
 
   def display_board
-    puts "#{human.name} is a #{human.marker}. #{computer.name} is a #{computer.marker}."
+    puts "#{human.name} is a #{human.marker}." \
+    " #{computer.name} is a #{computer.marker}."
     display_score
     puts ""
     board.draw
     puts ""
   end
 
+  # def joinor(arr, separator=', ', last='or')
+  #   if arr.size == 1
+  #     "#{arr[0]} is your only option"
+  #   elsif arr.size == 2
+  #     arr[0].to_s + " " + last + " " + arr[1].to_s
+  #   else
+  #     arr[0..-2].join(separator) + separator + last + " " + arr[-1].to_s
+  #   end
+  # end
+
   def joinor(arr, separator=', ', last='or')
-    if arr.size == 1
-      "#{arr[0]} is your only option"
-    elsif arr.size == 2
-      arr[0].to_s + " " + last + " " + arr[1].to_s
+    case arr.size
+    when 1 then arr[0]
+    when 2 then "#{arr[0]} #{last} #{arr[1]}"
     else
-      arr[0..-2].join(separator) + separator + last + " " + arr[-1].to_s
+      arr[-1] = "#{last} #{arr[-1]}"
+      arr.join(separator)
     end
   end
 
@@ -252,7 +269,7 @@ class TTTGame
       square = winning_square
     elsif find_at_risk_square
       square = find_at_risk_square
-    else board.square_five_open?
+    elsif board.square_five_open?
       square = board.square_five_open?
     end
 
@@ -285,31 +302,50 @@ class TTTGame
   def choose_player_to_go_first
     answer = nil
     loop do
-      puts "Which player should go first? Select #{human.name[0].downcase} for #{human.name} and #{computer.name[0].downcase} for #{computer.name}"
+      puts "Which player should go first? Select #{go_first_choices}"
       answer = gets.chomp
-      break if answer == human.name[0].downcase || answer == computer.name[0].downcase
-      puts "I'm sorry, you must enter either #{human.name[0].downcase} or #{computer.name[0].downcase}"
+      break if answer == human_initial || answer == comp_initial
+      puts "I'm sorry, you must enter either" \
+      "#{human_initial} or #{comp_initial}"
     end
-    if answer == 'h' then @current_marker = human_marker; end
-    if answer == 'c' then @current_marker = COMPUTER_MARKER; end
+    assign_current_marker_based_on(answer)
+  end
+
+  def assign_current_marker_based_on(answer)
+    case answer
+    when human_initial then @current_marker = human_marker
+    when comp_initial then @current_marker = COMPUTER_MARKER
+    end
+  end
+
+  def go_first_choices
+    "#{human_initial}' for #{human.name} and" \
+    " '#{comp_initial}' for #{computer.name}"
+  end
+
+  def human_initial
+    human.name[0].downcase
+  end
+
+  def comp_initial
+    computer.name[0].downcase
   end
 
   def display_result
-    clear_screen_and_display_board
-
     case board.winning_marker
     when human.marker
-      human.score += 1
-      puts "You won!"
-      sleep(1)
+      update_score(human)
     when computer.marker
-      computer.score += 1
-      puts "Computer won!"
-      sleep(1)
+      update_score(computer)
     else
       puts "It's a tie!"
-      sleep(1)
     end
+    sleep(1)
+  end
+
+  def update_score(winner)
+    winner.score += 1
+    puts "#{winner.name} won!"
   end
 
   def play_again?
@@ -347,5 +383,3 @@ end
 
 game = TTTGame.new
 game.play
-
-
