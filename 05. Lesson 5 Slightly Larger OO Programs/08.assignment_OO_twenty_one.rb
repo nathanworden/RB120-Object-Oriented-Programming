@@ -31,53 +31,85 @@
 # Game
 # - start
 
+require 'pry'
+
 #4)
 module Hand
-  def initialize(cards, name)
-    @cards = cards
+  attr_reader :name
+  attr_accessor :cards, :total
+
+  def initialize(name)
     @name = name
+    @cards = []
   end
 
-  def hit
-  end
-
-  def stay
+  def hit(deck)
+    cards << deck.current_deck.delete(deck.current_deck.sample)
   end
 
   def busted?
+    @total > 21
   end
 
-  def total
-    #definitley looks like we need to know about "cards" to produce some total.
+  def calculate_total
+    if cards.any? {|word| word.start_with?("Ace")}
+      w_o_aces = cards.map(&:to_i).sum
+      if w_o_aces + 11 > 21
+        w_o_aces += 1 
+      else
+        w_o_aces += 11
+      end
+      @total = w_o_aces
+    else
+      @total = cards.map(&:to_i).sum
+    end
   end
+
+#   def calculate_total
+#     cards.map!(&:to_s)
+#     if bfr_acc_for_aces.include?("Ace")
+#       cards.delete('Ace')
+#       if cards.sum + 11 > 21
+#         cards << 1
+#       else
+#         cards << 11
+#       end
+#     end
+#       @total = cards.sum
+#   end
+
+#   def bfr_acc_for_aces
+#     cards.map! do |card|
+#       if card.start_with?("Ace")
+#         "Ace"
+#       elsif card.to_i == 0
+#         10
+#       else
+#         card.to_i
+#       end
+#     end
+#   end
 end
 
 class Player
   include Hand
 end
 
-class Dealer
-  include Hand
-end
-
 
 class Deck
-  attr_reader :deck
+  attr_accessor :current_deck
 
   def initialize
-    suits = ["Hearts", "Spades", "Clubs", "Diamods"]
+    suits = ["Hearts", "Spades", "Clubs", "Diamonds"]
     card_values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
-    @deck = []
+    @current_deck = []
     suits.each do |suit|
       card_values.each do |card|
-        @deck << card + " of " + suit
+        @current_deck << card + " of " + suit
       end
     end
   end
 
-  def deal
-    # does the dealer or the deck deal?
-  end
 end
 
 class Card
@@ -87,6 +119,15 @@ class Card
 end
 
 class Game
+  attr_accessor :deck
+  attr_reader :human, :dealer
+
+  def initialize 
+    @human = Player.new("human")
+    @dealer = Player.new("dealer")
+    @deck = Deck.new
+  end
+
   def start
     deal_cards
     show_initial_cards
@@ -94,14 +135,85 @@ class Game
     dealer_turn
     show_result
   end
+
+  def deal_cards
+    2.times do
+      card = deck.current_deck.sample
+      @human.cards << card
+      deck.current_deck.delete(card)
+    end
+    2.times do
+      card = deck.current_deck.sample
+      @dealer.cards << card
+      deck.current_deck.delete(card)
+    end
+  end
+
+  def show_initial_cards
+    show_human_cards
+    p "Dealer is showing: #{dealer.cards[0]}"
+    # p "Number of cards in the deck: #{deck.current_deck.size}"
+  end
+
+  def show_human_cards
+    puts "Human's cards are: #{human.cards}"
+  end
+
+  def player_turn
+    answer = nil
+    loop do
+    human.calculate_total
+      loop do
+        puts "Would you like to hit ('h') or stay ('s')?"
+        answer = gets.chomp.downcase
+        break if answer == 'h' || answer == 's'
+        puts "Invalid entry. Must enter 'h' or 's'"
+      end
+      if answer == 'h'
+        human.hit(deck)
+      elsif answer == 's'
+        human.calculate_total
+        break
+      end
+      show_human_cards
+      break if human.busted?
+    end
+  end
+
+  def dealer_turn
+    # binding.pry
+    dealer.calculate_total
+    loop do
+      dealer.hit(deck) if dealer.total < 17
+      dealer.calculate_total
+      break if dealer.busted? || dealer.total >= 17
+    end
+  end
+
+  def show_result
+    puts "Human's total is #{human.total}"
+    puts "Human Busted" if human.busted? 
+    puts "Dealer's total is #{dealer.total}"
+    puts "Dealer Busted" if dealer.busted? 
+    puts "Dealer's final cards are: #{dealer.cards}"
+    declare_winner
+  end
+
+  def declare_winner
+    if human.busted? && !dealer.busted?
+      puts "Dealer Won!"
+    elsif dealer.busted? && !human.busted?
+      puts "Human won!"
+    elsif human.busted? && human.busted?
+      puts "You both busted. Its a tie."
+    elsif human.total > dealer.total
+      puts "Human won!"
+    elsif dealer.total > human.total
+      puts "dealer won!"
+    end
+  end
 end
 
 Game.new.start
-
-
-
-
-
-
 
 
