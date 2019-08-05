@@ -32,7 +32,7 @@ class Board
     nil
   end
 
-  def find(marker_type)
+  def find_square_that_could_end_game(marker_type)
     square = nil
     WINNING_LINES.each do |line|
       if @squares.values_at(*line).map(&:marker).count(marker_type) == 2
@@ -117,7 +117,13 @@ class Player
     else
       puts "What is your name?"
     end
-    gets.chomp
+    answer = ''
+    loop do
+      answer = gets.chomp
+      break if !answer.empty?
+      puts "Name needs to be at least one character long"
+    end
+    answer
   end
 end
 
@@ -125,10 +131,15 @@ class TTTGame
   COMPUTER_MARKER = "O"
   FIRST_TO_MOVE = "CHOOSE"
 
+  private
+  
   attr_accessor :human_marker
   attr_reader :board, :human, :computer
 
+  public
+
   def initialize
+    clear
     @board = Board.new
     @human_marker = pick_your_marker
     @human = Player.new(human_marker)
@@ -179,11 +190,20 @@ class TTTGame
     loop do
       puts "Pick any key on your keyboard (except 'O') to be your marker"
       answer = gets.chomp
-      break unless answer == COMPUTER_MARKER || answer.nil?
-      puts "#{COMPUTER_MARKER} is already taken you dufus." \
-       "Pick something else or I'll call you a dum-dum"
+      break unless not_allowed(answer)
+      puts "You can't choose #{COMPUTER_MARKER} and you can't" \
+       " choose more than one character for your marker," \
+       " and you can't leave your answer blank. I know. That's a lot " \
+       "of rules, but you're going to break the board if you " \
+       "don't choose right so do me solid here."
     end
     answer
+  end
+
+  def not_allowed(answer)
+    answer == COMPUTER_MARKER ||
+      answer.size > 1 ||
+      answer == ''
   end
 
   def champion?
@@ -230,16 +250,6 @@ class TTTGame
     puts ""
   end
 
-  # def joinor(arr, separator=', ', last='or')
-  #   if arr.size == 1
-  #     "#{arr[0]} is your only option"
-  #   elsif arr.size == 2
-  #     arr[0].to_s + " " + last + " " + arr[1].to_s
-  #   else
-  #     arr[0..-2].join(separator) + separator + last + " " + arr[-1].to_s
-  #   end
-  # end
-
   def joinor(arr, separator=', ', last='or')
     case arr.size
     when 1 then arr[0]
@@ -281,11 +291,11 @@ class TTTGame
   end
 
   def find_at_risk_square
-    board.find(human_marker)
+    board.find_square_that_could_end_game(human_marker)
   end
 
   def winning_square
-    board.find(COMPUTER_MARKER)
+    board.find_square_that_could_end_game(COMPUTER_MARKER)
   end
 
   def current_player_moves
@@ -361,7 +371,7 @@ class TTTGame
   end
 
   def clear
-    system "clear"
+    system("clear") || system("cls")
   end
 
   def reset_board
