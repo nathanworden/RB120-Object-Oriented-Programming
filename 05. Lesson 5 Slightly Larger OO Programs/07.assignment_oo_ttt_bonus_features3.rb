@@ -132,7 +132,7 @@ class TTTGame
   FIRST_TO_MOVE = "CHOOSE"
 
   private
-  
+
   attr_accessor :human_marker
   attr_reader :board, :human, :computer
 

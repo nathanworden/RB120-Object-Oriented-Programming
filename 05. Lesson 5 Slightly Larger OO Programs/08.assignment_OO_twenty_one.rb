@@ -1,39 +1,3 @@
-# 1) Write a Description of the problem
-# Twenty One is a card game where the goal of the game is to get your
-# cards to add up to exactly 21. The game is dealer vs. player. 
- # - Both players are delt 2 cards from a 52 card deck.
- # - The player takes the first turn, and can 'hit' or 'stay'
- # - If the player busts, he loses. If he stays, its the dealer's turn
- # - The dealer must hit until his cards add up to at least 17
- # - If he busts, the player wins. If both player and dealer stays, then the highest total wins.
- # - If both totals are equal, then it's a tie, and nobody wins.
-
- #2) Nouns and verbs:
- # Nouns: card, deck, player, dealer, participant, game, total
- # Verbs: deal, Hit, sty, bust
-
- #3) 
-# Player
-  # - hit
-  # - stay
-  # - busted?
-  # - total
-# Dealer
-  # - hit
-  # - stay
-  # - busted?
-  # - total
-  # - deal (should this be here, or in Deck?)
-# Participant
-# Deck
-# - deal (should this be here, or in Dealer?)
-# Card
-# Game
-# - start
-
-require 'pry'
-
-#4)
 module Hand
   attr_reader :name
   attr_accessor :cards, :total
@@ -52,56 +16,45 @@ module Hand
   end
 
   def calculate_total
-    if cards.any? {|word| word.start_with?("Ace")}
-      w_o_aces = cards.map(&:to_i).sum
-      if w_o_aces + 11 > 21
-        w_o_aces += 1 
-      else
-        w_o_aces += 11
-      end
-      @total = w_o_aces
+    copy_hand = cards.dup
+    convert_all_to_integers_except_aces!(copy_hand)
+    if copy_hand.map(&:to_s).any? { |word| word.start_with?("Ace") }
+      copy_hand_total_w_o_aces = copy_hand.map(&:to_i).sum
+      copy_hand_total_w_o_aces += if copy_hand_total_w_o_aces + 11 > 21
+                                    1
+                                  else
+                                    11
+                                  end
+      @total = copy_hand_total_w_o_aces
     else
-      @total = cards.map(&:to_i).sum
+      @total = copy_hand.map(&:to_i).sum
     end
   end
 
-#   def calculate_total
-#     cards.map!(&:to_s)
-#     if bfr_acc_for_aces.include?("Ace")
-#       cards.delete('Ace')
-#       if cards.sum + 11 > 21
-#         cards << 1
-#       else
-#         cards << 11
-#       end
-#     end
-#       @total = cards.sum
-#   end
-
-#   def bfr_acc_for_aces
-#     cards.map! do |card|
-#       if card.start_with?("Ace")
-#         "Ace"
-#       elsif card.to_i == 0
-#         10
-#       else
-#         card.to_i
-#       end
-#     end
-#   end
+  def convert_all_to_integers_except_aces!(hand)
+    hand.map! do |card|
+      if card.start_with?(/[JQK]/)
+        10
+      elsif card.start_with?(/\d/)
+        card.to_i
+      else
+        card
+      end
+    end
+  end
 end
 
 class Player
   include Hand
 end
 
-
 class Deck
   attr_accessor :current_deck
 
   def initialize
     suits = ["Hearts", "Spades", "Clubs", "Diamonds"]
-    card_values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
+    card_values = ["2", "3", "4", "5", "6", "7", "8", "9", "10"] +
+                  ["Jack", "Queen", "King", "Ace"]
     @current_deck = []
     suits.each do |suit|
       card_values.each do |card|
@@ -109,12 +62,11 @@ class Deck
       end
     end
   end
-
 end
 
 class Card
   def initialize
-    #what are the "states" of a card?
+    # what are the "states" of a card?
   end
 end
 
@@ -122,13 +74,15 @@ class Game
   attr_accessor :deck
   attr_reader :human, :dealer
 
-  def initialize 
+  def initialize
     @human = Player.new("human")
     @dealer = Player.new("dealer")
     @deck = Deck.new
   end
 
   def start
+    system 'clear'
+    display_welcome_message
     deal_cards
     show_initial_cards
     player_turn
@@ -136,15 +90,20 @@ class Game
     show_result
   end
 
+  def display_welcome_message
+    puts "Welcome to 21!"
+    puts ""
+  end
+
   def deal_cards
+    deal_to(@human)
+    deal_to(@dealer)
+  end
+
+  def deal_to(player)
     2.times do
       card = deck.current_deck.sample
-      @human.cards << card
-      deck.current_deck.delete(card)
-    end
-    2.times do
-      card = deck.current_deck.sample
-      @dealer.cards << card
+      player.cards << card
       deck.current_deck.delete(card)
     end
   end
@@ -160,18 +119,14 @@ class Game
   end
 
   def player_turn
-    answer = nil
+    @answer = nil
     loop do
-    human.calculate_total
-      loop do
-        puts "Would you like to hit ('h') or stay ('s')?"
-        answer = gets.chomp.downcase
-        break if answer == 'h' || answer == 's'
-        puts "Invalid entry. Must enter 'h' or 's'"
-      end
-      if answer == 'h'
+      human.calculate_total
+      player_answer_loop
+      if @answer == 'h'
         human.hit(deck)
-      elsif answer == 's'
+        human.calculate_total
+      elsif @answer == 's'
         human.calculate_total
         break
       end
@@ -180,8 +135,16 @@ class Game
     end
   end
 
+  def player_answer_loop
+    loop do
+      puts "Would you like to hit ('h') or stay ('s')?"
+      @answer = gets.chomp.downcase
+      break if @answer == 'h' || @answer == 's'
+      puts "Invalid entry. Must enter 'h' or 's'"
+    end
+  end
+
   def dealer_turn
-    # binding.pry
     dealer.calculate_total
     loop do
       dealer.hit(deck) if dealer.total < 17
@@ -192,28 +155,64 @@ class Game
 
   def show_result
     puts "Human's total is #{human.total}"
-    puts "Human Busted" if human.busted? 
+    puts "Human Busted" if human.busted?
     puts "Dealer's total is #{dealer.total}"
-    puts "Dealer Busted" if dealer.busted? 
+    puts "Dealer Busted" if dealer.busted?
     puts "Dealer's final cards are: #{dealer.cards}"
     declare_winner
   end
 
   def declare_winner
-    if human.busted? && !dealer.busted?
-      puts "Dealer Won!"
-    elsif dealer.busted? && !human.busted?
-      puts "Human won!"
-    elsif human.busted? && human.busted?
-      puts "You both busted. Its a tie."
+    if someone_busted?
+      determine_who_busted
+    elsif human.total == dealer.total
+      puts "It's a tie!"
     elsif human.total > dealer.total
       puts "Human won!"
     elsif dealer.total > human.total
-      puts "dealer won!"
+      puts "Dealer won!"
     end
   end
+
+  def determine_who_busted
+    if human.busted? && dealer.busted?
+      puts "You both busted. Its a tie." 
+    elsif human.busted?
+      puts "Dealer Won!"
+    elsif dealer.busted?
+      puts "Human Won!"
+    end
+  end
+
+  def someone_busted?
+    human.busted? || dealer.busted?
+  end
+
+  def situations_where_dealer_won
+    human.busted? && !dealer.busted? ||
+    dealer.total > human.total
+  end
+
+  def situations_where_human_won
+    dealer.busted? && !human.busted? ||
+    human.total > dealer.total
+  end
+
+  # def declare_winner
+  #   if human.busted? && !dealer.busted?
+  #     puts "Dealer Won!"
+  #   elsif dealer.busted? && !human.busted?
+  #     puts "Human won!"
+  #   elsif human.busted? && dealer.busted?
+  #     puts "You both busted. Its a tie."
+  #   elsif human.total > dealer.total
+  #     puts "Human won!"
+  #   elsif dealer.total > human.total
+  #     puts "Dealer won!"
+  #   elsif human.total == dealer.total
+  #     puts "Its a tie!"
+  #   end
+  # end
 end
 
 Game.new.start
-
-
