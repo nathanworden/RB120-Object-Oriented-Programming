@@ -1,7 +1,7 @@
 require 'pry'
 module Hand
   attr_reader :name
-  attr_accessor :cards, :total
+  attr_accessor :cards
 
   def initialize(name)
     @name = name
@@ -9,75 +9,32 @@ module Hand
   end
 
   def hit(deck)
-    cards << deck.current_deck.delete(deck.current_deck.sample)
+    cards << deck.all_cards.delete(deck.all_cards.sample)
   end
 
   def busted?
-    @total > 21
+    total > 21
   end
 
-  def calculate_total
-    copy_hand = cards.dup
-    convert_all_to_integers_except_aces!(copy_hand)
-    convert_aces(copy_hand)
-    if copy_hand.map(&:to_s).any? { |word| word.start_with?("Ace") }
-      copy_hand_total_w_o_aces = copy_hand.map(&:to_i).sum
-      copy_hand_total_w_o_aces += if copy_hand_total_w_o_aces + 11 > 21
-                                    1
-                                  else
-                                    11
-                                  end
-      @total = copy_hand_total_w_o_aces
-    else
-      @total = copy_hand.map(&:to_i).sum
-    end
-  end
-
-  def convert_aces(hand)
-    convert_one_ace_to_1(hand) if two_aces?(hand)
-    convert_two_aces_to_1(hand) if three_aces?(hand)
-    convert_three_aces_to_1(hand) if four_aces?(hand)
-  end
-
-  def two_aces?(hand)
-    num_aces(hand) == 2
-  end
-
-  def three_aces?(hand)
-    num_aces(hand) == 3
-  end
-
-  def four_aces?(hand)
-    num_aces(hand) == 4
-  end
-
-  def num_aces(hand)
-    hand.map(&:to_s).count { |card| card.start_with?("Ace") }
-  end
-
-  def convert_one_ace_to_1(hand)
-    first_ace_idx = hand.map(&:to_s).index { |card| card.start_with?("Ace") }
-    hand[first_ace_idx] = 1
-  end
-
-  def convert_two_aces_to_1(hand)
-    2.times { convert_one_ace_to_1(hand) }
-  end
-
-  def convert_three_aces_to_1(hand)
-    3.times { convert_one_ace_to_1(hand) }
-  end
-
-  def convert_all_to_integers_except_aces!(hand)
-    hand.map! do |card|
-      if card.start_with?(/[JQK]/)
-        10
-      elsif card.start_with?(/\d/)
-        card.to_i
+  def total
+    total = 0
+    cards.each do |card|
+      if card.ace?
+        total += 11
+      elsif card.jack? || card.queen? || card.king?
+        total += 10
       else
-        card
+        total += card.value.to_i
       end
     end
+    
+    # correct for Aces
+    cards.select(&:ace?).count.times do
+      break if total <= 21
+      total -= 10
+    end
+
+    total
   end
 end
 
@@ -86,24 +43,48 @@ class Player
 end
 
 class Deck
-  attr_accessor :current_deck
+  attr_accessor :all_cards
 
   def initialize
-    suits = ["Hearts", "Spades", "Clubs", "Diamonds"]
-    card_values = ["2", "3", "4", "5", "6", "7", "8", "9", "10"] +
-                  ["Jack", "Queen", "King", "Ace"]
-    @current_deck = []
-    suits.each do |suit|
-      card_values.each do |card|
-        @current_deck << card + " of " + suit
+    @all_cards = []
+    Card::SUITS.each do |suit|
+      Card::VALUES.each do |value|
+        @all_cards << Card.new(suit, value)
       end
     end
   end
 end
 
 class Card
-  def initialize
-    # what are the "states" of a card?
+  SUITS = ["Hearts", "Spades", "Clubs", "Diamonds"]
+  VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10"] +
+           ["Jack", "Queen", "King", "Ace"]
+
+  attr_accessor :value, :suit
+
+  def initialize(suit, value)
+    @suit = suit
+    @value = value
+  end
+
+  def to_s
+    "The #{value} of #{suit}"
+  end
+
+  def ace?
+    value == 'Ace'
+  end
+
+  def king?
+    value == 'King'
+  end
+
+  def queen?
+    value == 'Queen'
+  end
+
+  def jack?
+    value == 'Jack'
   end
 end
 
@@ -112,8 +93,8 @@ class Game
   attr_reader :human, :dealer
 
   def initialize
-    @human = Player.new("human")
-    @dealer = Player.new("dealer")
+    @human = Player.new("Human")
+    @dealer = Player.new("Dealer")
     @deck = Deck.new
   end
 
@@ -139,31 +120,35 @@ class Game
 
   def deal_to(player)
     2.times do
-      card = deck.current_deck.sample
+      card = deck.all_cards.sample
       player.cards << card
-      deck.current_deck.delete(card)
+      deck.all_cards.delete(card)
     end
   end
 
   def show_initial_cards
-    show_human_cards
+    show_human_cards(true)
     p "Dealer is showing: #{dealer.cards[0]}"
   end
 
-  def show_human_cards
-    puts "Human's cards are: #{human.cards}"
+  def show_human_cards(clear=false)
+    system 'clear' unless clear
+    puts "---- Human's cards are ----"
+    human.cards.each do |card|
+      puts "=> #{card}"
+    end
   end
 
   def player_turn
     @answer = nil
     loop do
-      human.calculate_total
+      human.total
       player_answer_loop
       if @answer == 'h'
         human.hit(deck)
-        human.calculate_total
+        human.total
       elsif @answer == 's'
-        human.calculate_total
+        human.total
         break
       end
       show_human_cards
@@ -181,10 +166,10 @@ class Game
   end
 
   def dealer_turn
-    dealer.calculate_total
+    dealer.total
     loop do
       dealer.hit(deck) if dealer.total < 17
-      dealer.calculate_total
+      dealer.total
       break if dealer.busted? || dealer.total >= 17
     end
   end
@@ -194,8 +179,32 @@ class Game
     puts "Human Busted" if human.busted?
     puts "Dealer's total is #{dealer.total}"
     puts "Dealer Busted" if dealer.busted?
-    puts "Dealer's final cards are: #{dealer.cards}"
+    show_dealer_final_cards
     declare_winner
+  end
+
+  def show_dealer_final_cards
+    puts "Dealer's final cards are:"
+    puts "+--" + "-" * length_of_longest_card_string + "--+"
+    dealer.cards.each do |card|
+      card_line(card)
+    end
+    puts "+--" + "-" * length_of_longest_card_string + "--+"
+  end
+
+  def card_line(card)
+    puts "|  The #{card.value} of #{card.suit}" + " " * 
+      (length_of_longest_card_string - card_suit_size(card)) + "  |"
+    end
+
+  def length_of_longest_card_string
+    dealer.cards.map do |card|
+      card_suit_size(card)
+    end.max
+  end
+
+  def card_suit_size(card)
+    "The #{card.value} of #{card.suit}".size
   end
 
   def declare_winner
