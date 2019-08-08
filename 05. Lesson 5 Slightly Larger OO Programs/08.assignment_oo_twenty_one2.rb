@@ -1,7 +1,6 @@
 require 'pry'
 module Hand
-  attr_reader :name
-  attr_accessor :cards
+  attr_accessor :name, :cards
 
   def initialize(name)
     @name = name
@@ -19,15 +18,15 @@ module Hand
   def total
     total = 0
     cards.each do |card|
-      if card.ace?
-        total += 11
-      elsif card.jack? || card.queen? || card.king?
-        total += 10
-      else
-        total += card.value.to_i
-      end
+      total += if card.ace?
+                 11
+               elsif card.jack? || card.queen? || card.king?
+                 10
+               else
+                 card.value.to_i
+               end
     end
-    
+
     # correct for Aces
     cards.select(&:ace?).count.times do
       break if total <= 21
@@ -40,6 +39,25 @@ end
 
 class Player
   include Hand
+
+  def initialize(name)
+    super(name)
+    initialize_name(name)
+  end
+
+  def initialize_name(name)
+    if name == "Human"
+      system 'clear'
+      loop do
+        puts "What's your name?"
+        self.name = gets.chomp
+        break unless name.empty?
+        puts "Sorry, must enter a value."
+      end
+    else
+      self.name = ['Blarg', "Bohemian", "Romancer", "Charlie Bit Me"].sample
+    end
+  end
 end
 
 class Deck
@@ -128,15 +146,21 @@ class Game
 
   def show_initial_cards
     show_human_cards(true)
-    p "Dealer is showing: #{dealer.cards[0]}"
+    p "#{dealer.name} is showing: #{dealer.cards[0]}"
   end
 
   def show_human_cards(clear=false)
     system 'clear' unless clear
-    puts "---- Human's cards are ----"
+    puts "#{human.name}'s Cards"
+    human_cards_line
     human.cards.each do |card|
-      puts "=> #{card}"
+      card_line(card, human)
     end
+    human_cards_line
+  end
+
+  def human_cards_line
+    puts "+---" + "-" * length_of_longest_card_string(human) + "----+"
   end
 
   def player_turn
@@ -175,30 +199,39 @@ class Game
   end
 
   def show_result
-    puts "Human's total is #{human.total}"
-    puts "Human Busted" if human.busted?
-    puts "Dealer's total is #{dealer.total}"
-    puts "Dealer Busted" if dealer.busted?
+    human_result_info
+    dealer_result_info
     show_dealer_final_cards
     declare_winner
   end
 
-  def show_dealer_final_cards
-    puts "Dealer's final cards are:"
-    puts "+--" + "-" * length_of_longest_card_string + "--+"
-    dealer.cards.each do |card|
-      card_line(card)
-    end
-    puts "+--" + "-" * length_of_longest_card_string + "--+"
+  def human_result_info
+    puts "#{human.name}'s total is #{human.total}"
+    puts "#{human.name} Busted" if human.busted?
   end
 
-  def card_line(card)
-    puts "|  The #{card.value} of #{card.suit}" + " " * 
-      (length_of_longest_card_string - card_suit_size(card)) + "  |"
-    end
+  def dealer_result_info
+    puts "#{dealer.name}'s total is #{dealer.total}"
+    puts "#{dealer.name} Busted" if dealer.busted?
+  end
 
-  def length_of_longest_card_string
-    dealer.cards.map do |card|
+  def show_dealer_final_cards
+    puts "Dealer's final cards are:"
+    puts "+---" + "-" * length_of_longest_card_string(dealer) + "----+"
+    dealer.cards.each do |card|
+      card_line(card, dealer)
+    end
+    puts "+---" + "-" * length_of_longest_card_string(dealer) + "----+"
+  end
+
+  def card_line(card, player)
+    puts "|  => The #{card.value} of #{card.suit}" +
+         " " * (length_of_longest_card_string(player) - card_suit_size(card)) +
+         "  |"
+  end
+
+  def length_of_longest_card_string(player)
+    player.cards.map do |card|
       card_suit_size(card)
     end.max
   end
@@ -217,11 +250,11 @@ class Game
   end
 
   def dealer_won?
-    puts "Dealer won!" if dealer.total > human.total
+    puts "#{dealer.name} won!" if dealer.total > human.total
   end
 
   def human_won?
-    puts "Human won!" if human.total > dealer.total
+    puts "#{human.name} won!" if human.total > dealer.total
   end
 
   def tie?
