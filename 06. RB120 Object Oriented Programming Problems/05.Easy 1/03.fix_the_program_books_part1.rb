@@ -1,14 +1,6 @@
 class Book
   # attr_reader :author, :title
 
-  def title
-    @title
-  end
-
-  def author
-    @author
-  end
-
   def initialize(author, title)
     @author = author
     @title = title
