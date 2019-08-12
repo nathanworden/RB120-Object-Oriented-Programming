@@ -40,6 +40,8 @@
 #   end
 # end
 
+require 'pry'
+
 class Pet
   attr_reader :animal, :name
 
@@ -75,15 +77,21 @@ class Owner
 end
 
 class Shelter
+  attr_reader :name, :orphans
+
   def initialize
     @owners = {}
-    @pets = []
-    @orphin = Owner.new('orphin')
+    @orphans = []
+    @name = "The Animal Shelter"
   end
 
-  def adopt(owner=@orphin, pet)
+  def adopt(owner, pet)
     owner.add_pet(pet)
     @owners[owner.name] ||= owner
+  end
+
+  def accept_orphin(pet)
+    @orphans << pet
   end
 
   def print_adoptions
@@ -94,8 +102,14 @@ class Shelter
     end
   end
 
-  def add_pet(pet)
-    @pets << pet
+  def print_unadopted_pets
+    puts "The Animal Shelter has the following unadopted pets:"
+    puts @orphans
+    puts
+  end
+
+  def number_of_unadopted_pets
+    @orphans.size
   end
 end
 
@@ -130,11 +144,19 @@ shelter.adopt(bholmes, sweetie)
 shelter.adopt(bholmes, molly)
 shelter.adopt(bholmes, chester)
 
-shelter.adopt(asta)
+shelter.accept_orphin(asta)
+shelter.accept_orphin(laddie)
+shelter.accept_orphin(fluffy)
+shelter.accept_orphin(kat)
+shelter.accept_orphin(ben)
+shelter.accept_orphin(chatterbox)
+shelter.accept_orphin(bluebell)
 
 
 shelter.print_adoptions
+shelter.print_unadopted_pets
 puts "#{phanson.name} has #{phanson.number_of_pets} adopted pets."
 puts "#{bholmes.name} has #{bholmes.number_of_pets} adopted pets."
+puts "#{shelter.name} has #{shelter.number_of_unadopted_pets} unadopted pets"
 
 
