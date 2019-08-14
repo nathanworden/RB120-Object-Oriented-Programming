@@ -64,35 +64,43 @@ class Minilang
   end
 end
 
-Minilang.new('PRINT').eval
-# 0
+#Further Exploration
+CENTIGRADE_TO_FAHRENHEIT = '5 PUSH %<degrees_c>d PUSH 9 MULT DIV PUSH 32 ADD PRINT'
+Minilang.new(format(CENTIGRADE_TO_FAHRENHEIT, degrees_c: 100)).eval
+minilang = Minilang.new(CENTIGRADE_TO_FAHRENHEIT)
+minilang.eval(degrees_)
 
-Minilang.new('5 PUSH 3 MULT PRINT').eval
-# 15
+#End Further Exploration
 
-Minilang.new('5 PRINT PUSH 3 PRINT ADD PRINT').eval
-# 5
-# 3
-# 8
+# Minilang.new('PRINT').eval
+# # 0
 
-Minilang.new('5 PUSH 10 PRINT POP PRINT').eval
-# 10
-# 5
+# Minilang.new('5 PUSH 3 MULT PRINT').eval
+# # 15
 
-Minilang.new('5 PUSH POP POP PRINT').eval
-# Empty stack!
+# Minilang.new('5 PRINT PUSH 3 PRINT ADD PRINT').eval
+# # 5
+# # 3
+# # 8
 
-Minilang.new('3 PUSH PUSH 7 DIV MULT PRINT ').eval
-# 6
+# Minilang.new('5 PUSH 10 PRINT POP PRINT').eval
+# # 10
+# # 5
 
-Minilang.new('4 PUSH PUSH 7 MOD MULT PRINT ').eval
-# 12
+# Minilang.new('5 PUSH POP POP PRINT').eval
+# # Empty stack!
 
-Minilang.new('-3 PUSH 5 XSUB PRINT').eval
-# Invalid token: XSUB
+# Minilang.new('3 PUSH PUSH 7 DIV MULT PRINT ').eval
+# # 6
 
-Minilang.new('-3 PUSH 5 SUB PRINT').eval
-# 8
+# Minilang.new('4 PUSH PUSH 7 MOD MULT PRINT ').eval
+# # 12
 
-Minilang.new('6 PUSH').eval
-# (nothing printed; no PRINT commands)
+# Minilang.new('-3 PUSH 5 XSUB PRINT').eval
+# # Invalid token: XSUB
+
+# Minilang.new('-3 PUSH 5 SUB PRINT').eval
+# # 8
+
+# Minilang.new('6 PUSH').eval
+# # (nothing printed; no PRINT commands)
