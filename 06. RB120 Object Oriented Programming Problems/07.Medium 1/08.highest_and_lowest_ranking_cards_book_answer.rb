@@ -1,44 +1,26 @@
 class Card
-  attr_reader :rank, :suit, :title
+  include Comparable
+  attr_reader :rank, :suit
+
+  VALUES = { 'Jack' => 11, 'Queen' => 12, 'King' => 13, 'Ace' => 14 }
 
   def initialize(rank, suit)
     @rank = rank
-    @title = convert(rank)
     @suit = suit
   end
 
-  def convert(rank)
-    case rank
-    when 'Jack' then 11
-    when 'Queen' then 12
-    when 'King' then 13
-    when 'Ace' then 14
-    else
-      rank
-    end
+  def to_s
+    "#{rank} of #{suit}"
+  end
+
+  def value
+    VALUES.fetch(rank, rank)
   end
 
   def <=>(other_card)
-    title <=> other_card.title
-  end
-
-  def <(other_card)
-    title < other_card.title
-  end
-
-  def >(other_card)
-    title > other_card.title
-  end
-
-  def ==(other_card)
-    title == other_card.title
-  end
-
-  def to_s
-    "The #{rank} of #{suit}"
+    value <=> other_card.value
   end
 end
-
 
 cards = [Card.new(2, 'Hearts'),
          Card.new(10, 'Diamonds'),

@@ -1,3 +1,5 @@
+require 'pry'
+
 class GuessingGame
   MAX_GUESSES = 7
   RANGE = 1..100
@@ -15,7 +17,7 @@ class GuessingGame
   }.freeze
 
   RESULT_OF_GAME_MESSAGE = {
-    win: "You won!".
+    win: "You won!",
     lose: "You have no more guesses. You lost!"
   }.freeze
 
@@ -26,7 +28,7 @@ class GuessingGame
   def play
     reset
     game_result = play_game
-    display_gmae_end_message(game_result)
+    display_game_end_message(game_result)
   end
 
   private
@@ -58,9 +60,26 @@ class GuessingGame
   def obtain_one_guess
     loop do
       print "Enter a number between #{RANGE.first} and #{RANGE.last}: "
+      guess = gets.chomp.to_i
+      return guess if RANGE.cover?(guess)
+      print "Invalid guess. "
+    end
+  end
 
+  def check_guess(guess_value)
+    return :match if guess_value == @secret_number
+    return :low if guess_value < @secret_number
+    :high
+  end
 
+  def display_game_end_message(result)
+    puts "", RESULT_OF_GUESS_MESSAGE[result]
+  end
+end
 
+binding.pry
+game = GuessingGame.new
+game.play
 
 
 
