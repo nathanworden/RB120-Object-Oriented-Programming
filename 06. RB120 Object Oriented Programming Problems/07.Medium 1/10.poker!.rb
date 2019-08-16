@@ -1,3 +1,5 @@
+require 'pry'
+
 class Card
   attr_reader :rank, :suit, :title
 
@@ -57,6 +59,7 @@ class Deck
 
   def draw
     reset if @deck.empty?
+    @deck.shuffle!
     @deck.pop
   end
 
@@ -72,12 +75,16 @@ class Deck
 end
 
 class PokerHand
-  attr_accessor :deck, :drawn
+  attr_accessor :deck, :drawn, :suits, :titles
 
   def initialize(deck)
     @deck = deck
     @drawn = []
+    @suits = []
+    @titles = []
     draw
+    get_suits
+    get_titles
   end
 
   def draw
@@ -85,7 +92,7 @@ class PokerHand
   end
 
   def print
-    p drawn
+    puts drawn
   end
 
   def evaluate
@@ -103,37 +110,52 @@ class PokerHand
     end
   end
 
+  def get_suits
+    drawn.each {|card| suits << card.suit}
+  end
+
+  def get_titles
+    drawn.each {|card| titles << card.title}
+  end
+
   private
 
   def royal_flush?
-    suits = []
-    drawn.each {|card| suits << card.suit}
     drawn.all? {|card| card.title >= 10} && suits.uniq.size == 1
   end
 
   def straight_flush?
-    drawn.all? {|card| }
+    suits.uniq.size == 1 && titles.max - titles.min == 4
   end
-
   def four_of_a_kind?
+    return false if !titles.uniq.size == 2
+    titles.any? {|title| titles.count(title) == 4}
   end
 
   def full_house?
+    return false if titles.uniq.size != 2
+    titles.any? {|title| titles.count(title) == 3}
   end
 
   def flush?
+    suits.uniq.size == 1
   end
 
   def straight?
+    titles.max - titles.min == 4 && titles.uniq.size == 5
   end
 
   def three_of_a_kind?
+    return false if !titles.uniq.size == 3
+    titles.any? {|title| titles.count(title) == 3}
   end
 
   def two_pair?
+    titles.select {|card| titles.count(card) == 2}.uniq.size == 2
   end
 
   def pair?
+    titles.select {|card| titles.count(card) == 2}.uniq.size == 1
   end
 end
 
@@ -249,3 +271,4 @@ hand = PokerHand.new([
   Card.new(3,      'Diamonds')
 ])
 puts hand.evaluate == 'High card'
+
