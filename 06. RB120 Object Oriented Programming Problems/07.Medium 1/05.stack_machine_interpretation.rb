@@ -62,7 +62,7 @@ class Minilang
   def print
     puts @register
   end
-end 
+end
 
 #Further Exploration
 CENTIGRADE_TO_FAHRENHEIT = '5 PUSH %<degrees_c>d PUSH 9 MULT DIV PUSH 32 ADD PRINT'
